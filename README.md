@@ -115,8 +115,7 @@ State any third-party data restrictions here if applicable.
 
 ## Citation
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXX)
-
+[![DOI](https://zenodo.org/badge/1095869874.svg)](https://doi.org/10.5281/zenodo.17602427)
 Please cite this repository as:
 
 > Marsellach, X. (2025). *Ageing is not just ageing — Data Analysis Pipeline* (v1.0.0) [Software]. Zenodo. https://doi.org/10.5281/zenodo.XXXXXX
