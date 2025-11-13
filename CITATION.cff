@@ -6,7 +6,7 @@ version: 1.0.0
 authors:
   - family-names: Marsellach
     given-names: Xavi
-repository-code: https://github.com/USER/REPO
+repository-code: https://github.com/xavimarsellach/ageing-amav
 preferred-citation:
   type: software
   title: "Ageing is not just ageing — Data Analysis Pipeline"
