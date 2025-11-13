@@ -12,13 +12,13 @@ format:
     documentclass: article
 
 execute:
-  engine: knitr         
+  engine: knitr
   echo: true
   warning: false
   message: false
   freeze: auto
   error: true
-  execute-dir: project    
+  execute-dir: project
 ---
 
 # Reconstruction of `AMAV_DATA.xlsx` file from published `Supplemental_Table_1.xlsx`:
