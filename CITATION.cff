@@ -6,6 +6,7 @@ version: 1.0.0
 authors:
   - family-names: Marsellach
     given-names: Xavi
+    orcid: "https://orcid.org/0000-0002-2435-6904"
 repository-code: https://github.com/xavimarsellach/ageing-amav
 preferred-citation:
   type: software
