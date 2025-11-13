@@ -70,7 +70,7 @@ quarto render analysis/Ageing_is_not_Just-ageing_AMAV_Data_Process_Pipeline.qmd
 ```
 
 - Rendering writes the Excel output to `output/AMAV_DATA.xlsx` (created if missing).
-- The document also renders `analysis/Ageing_pipeline.html` (and, if enabled, PDF).
+- The document also renders `analysis/Ageing_is_not_Just-ageing_AMAV_Data_Process_Pipeline.html` (and, if enabled, PDF).
 
 ---
 

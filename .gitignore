@@ -22,3 +22,10 @@ __pycache__/
 # Generated
 output/
 figures/
+
+# Quarto outputs
+analysis/*.pdf
+analysis/*.html
+analysis/*.tex
+analysis/*_files/
+analysis/*.knit.md
