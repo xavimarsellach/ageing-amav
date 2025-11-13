@@ -1,0 +1,82 @@
+---
+title: "Ageing is not just ageing Data Analysis Pipeline"
+author: "Xavi Marsellach"
+date: today
+
+format:
+  html:
+    toc: true
+    code-fold: true
+  pdf:
+    pdf-engine: lualatex
+    documentclass: article
+
+execute:
+  engine: knitr         
+  echo: true
+  warning: false
+  message: false
+  freeze: auto
+  error: true
+execute-dir: project    
+---
+
+# Reconstruction of `AMAV_DATA.xlsx` file from published `Supplemental_Table_1.xlsx`:
+
+## Purpose
+
+Prevalence data for **31 diseases** are provided in a single consolidated workbook, **`Supplemental_Table_1.xlsx`**. The Python script in this section reconstructs the **AMAV lines** directly from `Supplemental_Table_1.xlsx`.
+
+## R Code
+
+```{r}
+#| label: run_pipeline
+#| message: true
+#| warning: true
+#| error: true
+# Works regardless of whether the QMD runs from repo root or inside 'analysis/'.
+
+# --- Find repo root: directory that contains 'scripts/' and 'data/' ---
+find_root <- function() {
+  cand <- c(".", "..", "../..")
+  for (c in cand) {
+    if (file.exists(file.path(c, "scripts", "build_amav_from_supplemental_Table_1.py")) &&
+        file.exists(file.path(c, "data",   "Supplemental_Table_1.xlsx"))) {
+      return(normalizePath(c))
+    }
+  }
+  stop("Can't locate repository root (need 'scripts/' and 'data/').")
+}
+root <- find_root()
+
+# --- Paths (absolute) ---
+script <- file.path(root, "scripts", "build_amav_from_supplemental_Table_1.py")
+inp    <- file.path(root, "data",   "Supplemental_Table_1.xlsx")
+outdir <- file.path(root, "output")
+out    <- file.path(outdir, "AMAV_DATA.xlsx")
+dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
+
+# --- Choose Python interpreter ---
+py <- Sys.getenv("PYTHON"); if (!nzchar(py)) py <- Sys.which("python3")
+stopifnot(nzchar(py), file.exists(py))
+
+# --- Run and show logs ---
+cmd_args <- c(script, inp, out)
+cat("$", py, paste(cmd_args, collapse = " "), "\n")
+res <- system2(py, args = cmd_args, stdout = TRUE, stderr = TRUE)
+cat(paste(res, collapse = "\n"), "\n")
+
+# --- Verify output ---
+stopifnot(file.exists(out))
+cat(sprintf("✅ OK: created %s\n", out))
+```
+
+## Code for `build_amav_from_supplemental_Table_1.py`
+
+```{python}
+#| label: Code for build_amav_from_supplemental_Table_1.py
+#| eval: false
+#| code-line-numbers: true
+#| code-fold: true
+{{< include "../scripts/build_amav_from_supplemental_Table_1.py" >}}
+```

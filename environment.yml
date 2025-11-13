@@ -1,0 +1,9 @@
+name: ageing-amav
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pandas=2.2.3
+  - numpy=2.1.2
+  - openpyxl
+  - xlsxwriter

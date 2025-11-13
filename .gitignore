@@ -1,0 +1,24 @@
+# macOS
+.DS_Store
+
+# R
+.Rhistory
+.RData
+.Rproj.user/
+_cache/
+.quarto/
+
+# Python
+__pycache__/
+*.pyc
+
+# Quarto output
+*.html
+
+# Environments
+.env
+*.lock
+
+# Generated
+output/
+figures/
