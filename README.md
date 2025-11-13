@@ -66,7 +66,7 @@ conda activate ageing-amav
 ### 2) (Optional) Render the Quarto document
 
 ```bash
-quarto render analysis/Ageing_pipeline.qmd
+quarto render analysis/Ageing_is_not_Just-ageing_AMAV_Data_Process_Pipeline.qmd
 ```
 
 - Rendering writes the Excel output to `output/AMAV_DATA.xlsx` (created if missing).
