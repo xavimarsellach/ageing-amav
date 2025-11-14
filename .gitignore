@@ -12,8 +12,12 @@ _cache/
 __pycache__/
 *.pyc
 
-# Quarto output
-*.html
+# Quarto outputs
+analysis/*.pdf
+analysis/*.html
+analysis/*.tex
+analysis/*_files/
+analysis/*.knit.md
 
 # Environments
 .env
