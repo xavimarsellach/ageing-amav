@@ -25,10 +25,14 @@ jobs:
         with:
           use-public-rspm: true
 
-      - name: Install R packages
+       - name: Install R packages
         run: |
-          Rscript -e 'install.packages(c("readxl","ggplot2","reshape2","scales","writexl","dplyr","tidyr"), repos = "https://cloud.r-project.org")'
-
+          Rscript -e 'install.packages(
+            c("knitr","rmarkdown",
+              "readxl","ggplot2","reshape2","scales",
+              "writexl","dplyr","tidyr"),
+            repos = "https://cloud.r-project.org"
+          )'
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
