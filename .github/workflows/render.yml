@@ -1,0 +1,57 @@
+name: Render Quarto pipeline
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "analysis/**"
+      - "scripts/**"
+      - "data/**"
+      - "environment.yml"
+      - "CITATION.cff"
+      - "README.md"
+  workflow_dispatch:
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - name: Install R packages
+        run: |
+          Rscript -e 'install.packages(c("readxl","ggplot2","reshape2","scales","writexl","dplyr","tidyr"), repos = "https://cloud.r-project.org")'
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python packages
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas==2.2.3 numpy==2.1.2 openpyxl xlsxwriter matplotlib statsmodels
+
+      - name: Set up Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: "latest"
+
+      - name: Render Quarto document
+        run: |
+          quarto render analysis/Ageing_is_not_Just-ageing_AMAV_Data_Process_Pipeline.qmd
+
+      - name: Upload rendered artefacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ageing-amav-render
+          path: |
+            analysis/Ageing_is_not_Just-ageing_AMAV_Data_Process_Pipeline.html
+            analysis/Ageing_is_not_Just-ageing_AMAV_Data_Process_Pipeline.pdf
