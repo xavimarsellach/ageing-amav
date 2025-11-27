@@ -10,7 +10,7 @@ authors:
     orcid: "https://orcid.org/0000-0002-2435-6904"
 
 repository-code: https://github.com/xavimarsellach/ageing-amav
-doi: 10.5281/zenodo.17602428
+doi: 10.5281/zenodo.17742857   # DOI for version v1.1.0
 
 preferred-citation:
   type: software
@@ -21,7 +21,7 @@ preferred-citation:
       given-names: Xavi
       orcid: "https://orcid.org/0000-0002-2435-6904"
   year: 2025
-  doi: 10.5281/zenodo.17602428
+  doi: 10.5281/zenodo.17742857
 
 references:
   - type: article
@@ -30,7 +30,7 @@ references:
       - family-names: Marsellach
         given-names: Xavi
     year: 2025
-    doi: 10.5281/zenodo.176626596   # <-- updated to Version 2 DOI
+    doi: 10.5281/zenodo.176626596
 
   - type: article
     title: "Rising disease prevalence signals epigenetic degeneration in humans"

@@ -1,5 +1,7 @@
 # Ageing is not just ageing & Rising disease prevalence — Data Analysis Pipeline
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17602427.svg)](https://doi.org/10.5281/zenodo.17602427)
+
 This repository contains the full data-analysis pipeline used in:
 
 1. **Ageing is not just ageing**  
@@ -21,7 +23,7 @@ Either filename is accepted automatically.
 
 ## Repository structure
 
-```
+```text
 .
 ├── README.md
 ├── LICENSE
@@ -33,13 +35,13 @@ Either filename is accepted automatically.
 │   └── Ageing_is_not_Just-ageing_AMAV_Data_Process_Pipeline.qmd
 ├── scripts/
 │   ├── build_amav_from_supplemental_Table_1.py
-│   ├── Figure_1_LOSS.R
 │   ├── Figure_1_RAW.R
+│   ├── Figure_1_LOSS.R
 │   ├── Figure_2_3_from_AMAV_DATA.R
-│   ├── FIGURE_4_PANEL_C.R
 │   ├── FIGURE_4_PANELS_A_and_B.R
+│   ├── FIGURE_4_PANEL_C.R
 │   ├── FIGURE_S1B.R
-│   ├── make_supplemental_figres.py
+│   ├── make_supplemental_figures.py
 │   └── remove_monotonic_prefix_FOLD_RELATIVE.R
 ├── data/
 │   ├── Supplemental_Table_1.xlsx
@@ -49,27 +51,24 @@ Either filename is accepted automatically.
 │   ├── Spore_Survival_RAW_Values_F1.csv
 │   └── Spore_Survival_RAW_Values.csv
 ├── output/
-│   ├── AMAV_DATA.xlsx
-│   ├── FIGURE_4A.png
-│   ├── FIGURE_4A_B.png
-│   ├── FIGURE_4B.png
-│   ├── FIGURE_4C.png
-│   └── GEOMETRIC_MEANS_MENTAL_vs_PHYSICAL_ANCOVA_thresholds_k0_to_k10.xlsx
 └── .github/workflows/
     └── render.yml
 ```
+
+> Note: some filenames may differ slightly as the repository evolves,  
+> but the overall structure and logic remain the same.
 
 ---
 
 ## What the pipeline does (summary)
 
 - Reads a single-table prevalence workbook (`Supplemental_Table_1.xlsx` or `Supplementary_Table_1.xlsx`).
-- Each row is one prevalence trend (study). A `Citation` column is ignored.
-- For each phenotype:
+- Each row is one prevalence trend (study). A `Citation` column, if present, is ignored.
+- For each phenotype (disease):
   - Builds piecewise linear slopes between observed points.
   - Computes yearly **MAV** (mean slope across studies).
   - Integrates MAV across the final contiguous block to obtain **AMAV**.
-  - If AMAV dips below zero, builds **AMAV-POS**.
+  - If AMAV dips below zero in that block, builds **AMAV-POS** (positive-limb accumulation with configurable handling of negative MAV).
 
 - Aggregates outputs across all phenotypes into `AMAV_DATA.xlsx`, containing:
 
@@ -77,59 +76,83 @@ Either filename is accepted automatically.
     Per-disease AMAV/AMAV-POS by calendar year.
 
   - **`FOLD_YEARLY`**  
-    Yearly fold-increase (normalised by the first positive AMAV value).
+    Yearly fold-increase (normalised by the first positive AMAV/AMAV-POS value).
 
   - **`FOLD_RELATIVE`**  
-    Same fold-increase series re-indexed 0…n per disease.
+    The same fold-increase series re-indexed 0…n per disease.
 
   - **`LOG_used_column`**  
-    Number of trends parsed per phenotype.
+    Number of trends parsed per phenotype (disease name and number of contributing studies).
 
-In addition, the `data/Spore_Survival_*.csv` files contain the raw spore-survival
-data used to generate **Figure 1** (raw prevalence and loss of studies).
+These sheets are then used by the R scripts to generate all **main figures (1–4)** and **supplemental figures** for the two manuscripts.
 
 ---
 
 ## Requirements
 
-- Conda/Miniforge
-- Python ≥ 3.12  
-  (`pandas`, `numpy`, `openpyxl`, `XlsxWriter`, `matplotlib`)
-- Quarto ≥ 1.4
-- LuaLaTeX (if rendering PDF)
+- **Conda/Miniforge** (or Mamba)
+- **Python ≥ 3.12** with:
+  - `pandas`, `numpy`, `openpyxl`, `XlsxWriter`, `matplotlib`, `statsmodels`
+- **Quarto ≥ 1.4**
+- **R** with packages:
+  - `readxl`, `ggplot2`, `reshape2`, `scales`, `writexl`, `dplyr`, `tidyr`
+- For **PDF** rendering: a TeX distribution with **LuaLaTeX** (e.g. MacTeX/TeX Live)
+
+All core Python packages are listed in `environment.yml`.
 
 ---
 
 ## Setup
+
+Create and activate the Conda environment:
 
 ```bash
 conda env create -f environment.yml
 conda activate ageing-amav
 ```
 
+Install the required R packages in your R installation (outside Conda, if you prefer):
+
+```r
+install.packages(c(
+  "readxl", "ggplot2", "reshape2", "scales",
+  "writexl", "dplyr", "tidyr"
+))
+```
+
 ---
 
-## Render the Quarto document
+## Rendering the Quarto document
+
+From the repository root:
 
 ```bash
+conda activate ageing-amav
 quarto render analysis/Ageing_is_not_Just-ageing_AMAV_Data_Process_Pipeline.qmd
 ```
 
-This:
+This will:
 
-- Rebuilds `output/AMAV_DATA.xlsx`
-- Generates all main and supplemental figures
-- Renders HTML/PDF depending on options
+1. Rebuild `output/AMAV_DATA.xlsx` from the appropriate `Supplemental(ary)_Table_1.xlsx`.
+2. Run all R scripts in `scripts/` to generate:
+   - Figure 1 (raw prevalence and loss of studies)
+   - Figures 2–3 (AMAV-derived disease trajectories)
+   - Figure 4 (mental vs physical fold-increase dynamics)
+   - Supplemental figures (e.g. S1B and others)
+3. Render HTML and, if enabled, PDF for the Quarto document.
 
 ---
 
-## Running the script directly
+## Running the Python script directly
+
+You can also run the Python AMAV builder without Quarto:
 
 ```bash
+conda activate ageing-amav
 python scripts/build_amav_from_supplemental_Table_1.py
 ```
 
-or explicitly:
+or explicitly specifying input and output:
 
 ```bash
 python scripts/build_amav_from_supplemental_Table_1.py   data/Supplementary_Table_1.xlsx   output/AMAV_DATA.xlsx
@@ -139,15 +162,12 @@ python scripts/build_amav_from_supplemental_Table_1.py   data/Supplementary_Tabl
 
 ## Reproducibility notes
 
-- Year columns auto-detected.
-- Numeric parsing robust to %, comma decimals, thousand separators.
-- Missing or irregular values handled gracefully.
-- The Quarto document orchestrates the full pipeline:
-  1. Rebuilds `AMAV_DATA.xlsx`.
-  2. Runs all figure scripts in `scripts/`.
-  3. Writes all derived files into `output/`.
+- Year columns are auto-detected (e.g. 1940…2023).
+- Numeric parsing is robust to percentages, comma decimals, and thousand separators.
+- Missing or irregular values are handled gracefully.
+- Results depend only on the content of the `data/` Excel workbooks and CSV files.
 
-Git LFS recommended for large `.xlsx` files:
+For large `.xlsx` files, Git LFS is recommended:
 
 ```bash
 git lfs install
@@ -159,26 +179,35 @@ git add .gitattributes
 
 ## Licence
 
-Code → `LICENSE`  
-Data & Docs → `LICENSE-Data`, `LICENSE-Docs`
+- **Code:** see `LICENSE` (e.g. MIT).
+- **Data:** see `LICENSE-Data`.
+- **Docs/Figures:** see `LICENSE-Docs`.
+
+Please check individual files or subdirectories for any additional restrictions.
 
 ---
 
 ## Citation
 
-### Software pipeline
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17602427.svg)](https://doi.org/10.5281/zenodo.17602427)
+
+If you use this repository, please cite:
+
+### 1. Software pipeline
 
 > Marsellach, X. (2025).  
-> *Ageing is not just ageing & Rising disease prevalence — Data Analysis Pipeline* (v1.1.0).  
-> Zenodo. https://doi.org/10.5281/zenodo.17602428
+> *Ageing is not just ageing & Rising disease prevalence — Data Analysis Pipeline* (v1.1.0) [Software].  
+> Zenodo. https://doi.org/10.5281/zenodo.17742857
 
-### Manuscripts
+### 2. Associated manuscripts
 
 > Marsellach, X. (2025). *Ageing is not just ageing*.  
-> https://doi.org/10.5281/zenodo.15596247
+> Zenodo. https://doi.org/10.5281/zenodo.176626596  
 
 > Marsellach, X. (2025). *Rising disease prevalence signals epigenetic degeneration in humans*.  
-> https://doi.org/10.20944/preprints202508.2157.v2
+> Preprints. https://doi.org/10.20944/preprints202508.2157.v2  
+
+Machine-readable citation metadata are provided in `CITATION.cff`.
 
 ---
 
