@@ -202,7 +202,7 @@ If you use this repository, please cite:
 ### 2. Associated manuscripts
 
 > Marsellach, X. (2025). *Ageing is not just ageing*.  
-> Zenodo. https://doi.org/10.5281/zenodo.176626596  
+> Zenodo. https://doi.org/10.5281/zenodo.17662596 
 
 > Marsellach, X. (2025). *Rising disease prevalence signals epigenetic degeneration in humans*.  
 > Preprints. https://doi.org/10.20944/preprints202508.2157.v2  
