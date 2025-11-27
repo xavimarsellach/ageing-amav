@@ -1,9 +1,27 @@
 name: ageing-amav
 channels:
   - conda-forge
+
 dependencies:
+  # --- Core Python ---
   - python=3.12
   - pandas=2.2.3
   - numpy=2.1.2
-  - openpyxl
-  - xlsxwriter
+
+  # --- Excel I/O ---
+  - openpyxl        # read/write .xlsx files
+  - xlsxwriter      # write .xlsx files (used for AMAV_DATA.xlsx)
+
+  # --- Python figure generation / statistical tools ---
+  - matplotlib      # required for supplemental figures generated in Python
+  - statsmodels     # optional, useful for regression / statistical analysis
+
+  # --- Optional tools ---
+  - pip             # allows you to install additional packages if needed
+
+  # --- R is NOT managed by Conda here ---
+  # Install the following R packages in your system R (outside Conda):
+  #   install.packages(c(
+  #     "readxl", "ggplot2", "reshape2", "scales",
+  #     "writexl", "dplyr", "tidyr"
+  #   ))

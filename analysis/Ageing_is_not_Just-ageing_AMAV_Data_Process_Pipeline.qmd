@@ -1,5 +1,5 @@
 ---
-title: "Ageing is not just ageing Data Analysis Pipeline"
+title: "*Ageing is not just ageing* and *Rising Disease Prevalence Signals Epigenetic Degeneration in Humans* — Data Analysis Pipeline"
 author: "Xavi Marsellach"
 date: today
 
@@ -16,18 +16,38 @@ execute:
   echo: true
   warning: false
   message: false
-  freeze: auto
+  freeze: false
   error: true
-  execute-dir: project
 ---
 
-# Reconstruction of `AMAV_DATA.xlsx` file from published `Supplemental_Table_1.xlsx`:
+# Overview
+
+This document reconstructs the master AMAV file and generates all main and supplemental figures used in:
+
+-   **Ageing is not just ageing**
+-   **Rising disease prevalence signals epigenetic degeneration in humans**
+
+The workflow is:
+
+1.  Rebuild `output/AMAV_DATA.xlsx` from the published prevalence workbook\
+    (`Supplemental_Table_1.xlsx` or `Supplementary_Table_1.xlsx`).
+2.  Generate **Figure 1** (raw prevalence and loss of studies).
+3.  Generate **Figures 2–3** (disease-level AMAV and AMAV-derived patterns).
+4.  Generate **Figure 4** (mental vs physical fold-increase dynamics).
+5.  Generate **Supplemental Figures**.
+
+All paths are resolved relative to the repository root, so this QMD can be run from within `analysis/` or from the project root.
+
+------------------------------------------------------------------------
+
+# 1. Reconstruction of `AMAV_DATA.xlsx` from `Supplemental(ary)_Table_1.xlsx`
 
 ## Purpose
 
-Prevalence data for **31 diseases** are provided in a single consolidated workbook, **`Supplemental_Table_1.xlsx`**. The Python script in this section reconstructs the **AMAV lines** directly from `Supplemental_Table_1.xlsx`.
+Prevalence data for **31 diseases** are provided in a single consolidated workbook, **`Supplemental(ary)_Table_1.xlsx`**.\
+The Python script in this section reconstructs the **AMAV lines** directly from this workbook and writes the aggregated outputs to `output/AMAV_DATA.xlsx`.
 
-## R Code
+## R code to run the Python pipeline
 
 ```{r}
 #| label: run_pipeline
@@ -36,22 +56,34 @@ Prevalence data for **31 diseases** are provided in a single consolidated workbo
 #| error: true
 # Works regardless of whether the QMD runs from repo root or inside 'analysis/'.
 
-# --- Find repo root: directory that contains 'scripts/' and 'data/' ---
+# --- Find repo root: directory that contains 'scripts/' and a data/Supplemental(ary)_Table_1.xlsx ---
 find_root <- function() {
   cand <- c(".", "..", "../..")
   for (c in cand) {
-    if (file.exists(file.path(c, "scripts", "build_amav_from_supplemental_Table_1.py")) &&
-        file.exists(file.path(c, "data",   "Supplemental_Table_1.xlsx"))) {
+    script_ok <- file.exists(file.path(c, "scripts", "build_amav_from_supplemental_Table_1.py"))
+    data_sup  <- file.exists(file.path(c, "data", "Supplemental_Table_1.xlsx"))
+    data_supp <- file.exists(file.path(c, "data", "Supplementary_Table_1.xlsx"))
+    if (script_ok && (data_sup || data_supp)) {
       return(normalizePath(c))
     }
   }
-  stop("Can't locate repository root (need 'scripts/' and 'data/').")
+  stop("Can't locate repository root (need 'scripts/' and 'data/Supplemental(ary)_Table_1.xlsx').")
 }
 root <- find_root()
 
 # --- Paths (absolute) ---
-script <- file.path(root, "scripts", "build_amav_from_supplemental_Table_1.py")
-inp    <- file.path(root, "data",   "Supplemental_Table_1.xlsx")
+script   <- file.path(root, "scripts", "build_amav_from_supplemental_Table_1.py")
+inp_sup  <- file.path(root, "data", "Supplemental_Table_1.xlsx")
+inp_supp <- file.path(root, "data", "Supplementary_Table_1.xlsx")
+
+if (file.exists(inp_sup)) {
+  inp <- inp_sup
+} else if (file.exists(inp_supp)) {
+  inp <- inp_supp
+} else {
+  stop("Cannot find Supplemental_Table_1.xlsx or Supplementary_Table_1.xlsx in 'data/'.")
+}
+
 outdir <- file.path(root, "output")
 out    <- file.path(outdir, "AMAV_DATA.xlsx")
 dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
@@ -71,6 +103,17 @@ stopifnot(file.exists(out))
 cat(sprintf("✅ OK: created %s\n", out))
 ```
 
+```{r}
+#| label: set_rootdir
+#| include: false
+
+# Use the repo root as knitr root.dir so that scripts expecting
+# to run from the project root (data/, output/, scripts/) work correctly.
+knitr::opts_knit$set(root.dir = root)
+
+cat("knitr root.dir set to:", getwd(), "\n")
+```
+
 ## Code for `build_amav_from_supplemental_Table_1.py`
 
 ```{python}
@@ -80,3 +123,139 @@ cat(sprintf("✅ OK: created %s\n", out))
 #| code-fold: true
 {{< include "../scripts/build_amav_from_supplemental_Table_1.py" >}}
 ```
+
+# 2. Main Figures — Ageing is not just ageing
+
+All subsequent chunks assume that:
+
+-   `root` points to the repository root (defined above); and\
+-   `output/AMAV_DATA.xlsx` has been created by the previous step.
+
+We call the existing R scripts in `scripts/`, which read from:
+
+-   `data/*.csv` for **Figure 1**
+-   `output/AMAV_DATA.xlsx` (sheets `AMAV`, `FOLD_YEARLY`, `FOLD_RELATIVE`) for **Figures 2–4**.
+
+The scripts write figure files into `output/` (or subfolders).
+
+## 2.1 Figure 1 — Raw prevalence and loss of studies
+
+```{r}
+#| label: Main Figure 1
+#| message: true
+#| warning: true
+#| error: true
+
+# Temporarily switch working directory to repo root
+old_wd <- getwd()
+setwd(root)
+on.exit(setwd(old_wd), add = TRUE)
+
+source(file.path("scripts", "Figure_1_RAW.R"))
+source(file.path("scripts", "Figure_1_LOSS.R"))
+
+cat("✅ Figure 1 scripts executed (RAW + LOSS).\n")
+```
+
+## 2.2 Figures 2 and 3 — AMAV-derived disease trajectories
+
+```{r}
+#| label: Main Figures 2 and 3
+#| message: true
+#| warning: true
+#| error: true
+
+old_wd <- getwd()
+setwd(root)
+on.exit(setwd(old_wd), add = TRUE)
+
+source(file.path("scripts", "Figure_2_3_from_AMAV_DATA.R"))
+cat("✅ Figures 2 and 3 generated from AMAV_DATA.xlsx.\n")
+```
+
+## **2.3 Figure 4 — Mental vs physical fold-increase dynamics**
+
+```{r}
+#| label: Main Figure 4
+#| message: true
+#| warning: true
+#| error: true
+
+old_wd <- getwd()
+setwd(root)
+on.exit(setwd(old_wd), add = TRUE)
+
+if (file.exists(file.path("scripts", "remove_monotonic_prefix_AMAV_FR.R"))) {
+  source(file.path("scripts", "remove_monotonic_prefix_AMAV_FR.R"))
+}
+
+source(file.path("scripts", "FIGURE_4_PANELS_A_and_B.R"))
+source(file.path("scripts", "FIGURE_4_PANEL_C.R"))
+
+cat("✅ Figure 4 panels generated.\n")
+```
+
+------------------------------------------------------------------------
+
+# **3. Supplemental Figures**
+
+Supplemental figures are generated from the same AMAV_DATA.xlsx file plus additional scripts for specific panels.
+
+## **3.1 Supplemental Figure S1B (example)**
+
+```{r}
+#| label: Supplemental Figure S1B
+#| message: true
+#| warning: true
+#| error: true
+
+old_wd <- getwd()
+setwd(root)
+on.exit(setwd(old_wd), add = TRUE)
+
+if (file.exists(file.path("scripts", "FIGURE_S1B.R"))) {
+  source(file.path("scripts", "FIGURE_S1B.R"))
+  cat("✅ Supplemental Figure S1B generated.\n")
+} else {
+  cat("⚠️ FIGURE_S1B.R not found; skipping.\n")
+}
+```
+
+## **3.2 Additional supplemental figures via Python script**
+
+```{r}
+#| label: Supplemental Figures S2 to S32
+#| message: true
+#| warning: true
+#| error: true
+
+old_wd <- getwd()
+setwd(root)
+on.exit(setwd(old_wd), add = TRUE)
+
+sup_script <- file.path("scripts", "make_supplemental_figres.py")
+if (file.exists(sup_script)) {
+  py2 <- Sys.getenv("PYTHON"); if (!nzchar(py2)) py2 <- Sys.which("python3")
+  stopifnot(nzchar(py2), file.exists(py2))
+
+  cmd_args2 <- c(sup_script)
+  cat("$", py2, paste(cmd_args2, collapse = " "), "\n")
+  res2 <- system2(py2, args = cmd_args2, stdout = TRUE, stderr = TRUE)
+  cat(paste(res2, collapse = "\n"), "\n")
+  cat("✅ Additional supplemental figures generated by Python.\n")
+} else {
+  cat("⚠️ make_supplemental_figres.py not found; skipping Python supplemental figures.\n")
+}
+```
+
+------------------------------------------------------------------------
+
+# 4. Summary
+
+This Quarto document provides an end-to-end, executable record of:
+
+1.  Reconstruction of `AMAV_DATA.xlsx` from the published prevalence workbook.\
+2.  Generation of all **main figures** (1–4).\
+3.  Generation of the **supplemental figures**.
+
+It is intended as an internal, fully reproducible logbook of how the figures for both manuscripts are produced from the underlying data.

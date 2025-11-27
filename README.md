@@ -1,7 +1,21 @@
-# Ageing is not just ageing — Data Analysis Pipeline
+# Ageing is not just ageing & Rising disease prevalence — Data Analysis Pipeline
 
-This repository contains a Quarto document that reconstructs `AMAV_DATA.xlsx` directly from the consolidated workbook `data/Supplemental_Table_1.xlsx`.  
-It implements the AMAV/AMAV-POS computation and exports the aggregated sheets **`AMAV-P`**, **`AMAV-F-Y`**, **`AMAV-F-R`**, and a **`LOG_used_column`**.
+This repository contains the full data-analysis pipeline used in:
+
+1. **Ageing is not just ageing**  
+2. **Rising disease prevalence signals epigenetic degeneration in humans**
+
+Both manuscripts rely on the same underlying epidemiological reconstruction of  
+**AMAV (Accumulated Mean Annual Variation)** and the associated  
+**fold-increase metrics**.
+
+The pipeline reconstructs `AMAV_DATA.xlsx` directly from the consolidated  
+prevalence workbooks:
+
+- `data/Supplemental_Table_1.xlsx` (used in *Ageing is not just ageing*)
+- `data/Supplementary_Table_1.xlsx` (used in *Rising disease prevalence…*)
+
+Either filename is accepted automatically.
 
 ---
 
@@ -10,91 +24,130 @@ It implements the AMAV/AMAV-POS computation and exports the aggregated sheets **
 ```
 .
 ├── README.md
-├── LICENSE                  # Code licence (e.g. MIT)
-├── LICENSE-Data             # Data licence (e.g. CC BY 4.0)
-├── LICENSE-Docs             # Docs/figures licence (e.g. CC BY 4.0)
+├── LICENSE
+├── LICENSE-Data
+├── LICENSE-Docs
 ├── CITATION.cff
-├── environment.yml          # Conda environment (Python)
+├── environment.yml
 ├── analysis/
-│   └── Ageing_pipeline.qmd  # Quarto document (R/knitr orchestrating Python)
+│   └── Ageing_is_not_Just-ageing_AMAV_Data_Process_Pipeline.qmd
 ├── scripts/
-│   └── build_amav_from_supplemental_Table_1.py
+│   ├── build_amav_from_supplemental_Table_1.py
+│   ├── Figure_1_LOSS.R
+│   ├── Figure_1_RAW.R
+│   ├── Figure_2_3_from_AMAV_DATA.R
+│   ├── FIGURE_4_PANEL_C.R
+│   ├── FIGURE_4_PANELS_A_and_B.R
+│   ├── FIGURE_S1B.R
+│   ├── make_supplemental_figres.py
+│   └── remove_monotonic_prefix_FOLD_RELATIVE.R
 ├── data/
-│   └── Supplemental_Table_1.xlsx
-├── output/                  # Rendered outputs (gitignored)
+│   ├── Supplemental_Table_1.xlsx
+│   ├── Supplementary_Table_1.xlsx
+│   ├── Spore_Survival_Loss_F1.csv
+│   ├── Spore_Survival_Loss.csv
+│   ├── Spore_Survival_RAW_Values_F1.csv
+│   └── Spore_Survival_RAW_Values.csv
+├── output/
+│   ├── AMAV_DATA.xlsx
+│   ├── FIGURE_4A.png
+│   ├── FIGURE_4A_B.png
+│   ├── FIGURE_4B.png
+│   ├── FIGURE_4C.png
+│   └── GEOMETRIC_MEANS_MENTAL_vs_PHYSICAL_ANCOVA_thresholds_k0_to_k10.xlsx
 └── .github/workflows/
-    └── render.yml           # (Optional) CI to render Quarto
+    └── render.yml
 ```
 
 ---
 
 ## What the pipeline does (summary)
 
-- Reads the single-table input `Supplemental_Table_1.xlsx` (one row = one prevalence trend; a `Citation` column, if present, is ignored).
-- For each phenotype (disease), builds piecewise linear slopes per study between observed points.
-- Computes yearly **MAV** (mean slope across studies) and integrates within the final contiguous block to obtain **AMAV**.
-- If AMAV dips below zero in that block, builds **AMAV-POS** (accumulating from the year after the AMAV valley; negatives allowed).
-- Aggregates outputs across all phenotypes into `AMAV_DATA.xlsx` with sheets:
-  - `AMAV-P` (per-disease AMAV/AMAV-POS by calendar year)
-  - `AMAV-F-Y` (normalised by first positive AMAV/AMAV-POS value, by year)
-  - `AMAV-F-R` (same normalisation, re-indexed from 0 per disease)
-  - `LOG_used_column` (phenotype name and number of trends parsed)
+- Reads a single-table prevalence workbook (`Supplemental_Table_1.xlsx` or `Supplementary_Table_1.xlsx`).
+- Each row is one prevalence trend (study). A `Citation` column is ignored.
+- For each phenotype:
+  - Builds piecewise linear slopes between observed points.
+  - Computes yearly **MAV** (mean slope across studies).
+  - Integrates MAV across the final contiguous block to obtain **AMAV**.
+  - If AMAV dips below zero, builds **AMAV-POS**.
+
+- Aggregates outputs across all phenotypes into `AMAV_DATA.xlsx`, containing:
+
+  - **`AMAV`**  
+    Per-disease AMAV/AMAV-POS by calendar year.
+
+  - **`FOLD_YEARLY`**  
+    Yearly fold-increase (normalised by the first positive AMAV value).
+
+  - **`FOLD_RELATIVE`**  
+    Same fold-increase series re-indexed 0…n per disease.
+
+  - **`LOG_used_column`**  
+    Number of trends parsed per phenotype.
+
+In addition, the `data/Spore_Survival_*.csv` files contain the raw spore-survival
+data used to generate **Figure 1** (raw prevalence and loss of studies).
 
 ---
 
 ## Requirements
 
-- **Conda/Miniforge** (or Mamba)
-- **Python 3.12+** with:
-  - `pandas`, `numpy`, `openpyxl`, `XlsxWriter`, `matplotlib`
-- **Quarto** (≥ 1.4) — only if you want to render the `.qmd` to HTML/PDF
-- For **PDF** rendering: a TeX distribution with **LuaLaTeX** (e.g. MacTeX/TeX Live)
-
-All Python packages are pinned in `environment.yml`.
+- Conda/Miniforge
+- Python ≥ 3.12  
+  (`pandas`, `numpy`, `openpyxl`, `XlsxWriter`, `matplotlib`)
+- Quarto ≥ 1.4
+- LuaLaTeX (if rendering PDF)
 
 ---
 
 ## Setup
-
-### 1) Create and activate the environment
 
 ```bash
 conda env create -f environment.yml
 conda activate ageing-amav
 ```
 
-### 2) (Optional) Render the Quarto document
+---
+
+## Render the Quarto document
 
 ```bash
 quarto render analysis/Ageing_is_not_Just-ageing_AMAV_Data_Process_Pipeline.qmd
 ```
 
-- Rendering writes the Excel output to `output/AMAV_DATA.xlsx` (created if missing).
-- The document also renders `analysis/Ageing_is_not_Just-ageing_AMAV_Data_Process_Pipeline.html` (and, if enabled, PDF).
+This:
+
+- Rebuilds `output/AMAV_DATA.xlsx`
+- Generates all main and supplemental figures
+- Renders HTML/PDF depending on options
 
 ---
 
-## Script entry points
-
-You can run the Python script directly (bypassing Quarto):
+## Running the script directly
 
 ```bash
-conda activate ageing-amav
-python scripts/build_amav_from_supplemental_Table_1.py        data/Supplemental_Table_1.xlsx        AMAV_DATA.xlsx
+python scripts/build_amav_from_supplemental_Table_1.py
 ```
 
-- First argument: input workbook (default search: `data/Supplemental_Table_1.xlsx`).
-- Second argument: output file (default: `AMAV_DATA.xlsx` at the repo root).
+or explicitly:
+
+```bash
+python scripts/build_amav_from_supplemental_Table_1.py   data/Supplementary_Table_1.xlsx   output/AMAV_DATA.xlsx
+```
 
 ---
 
 ## Reproducibility notes
 
-- Results depend only on the content of `data/Supplemental_Table_1.xlsx`.
-- Year columns are auto-detected (e.g. `1940 … 2023`); a `Citation` column is ignored if present.
-- Numeric parsing is robust to percent signs, comma decimals, and thousand separators.
+- Year columns auto-detected.
+- Numeric parsing robust to %, comma decimals, thousand separators.
+- Missing or irregular values handled gracefully.
+- The Quarto document orchestrates the full pipeline:
+  1. Rebuilds `AMAV_DATA.xlsx`.
+  2. Runs all figure scripts in `scripts/`.
+  3. Writes all derived files into `output/`.
 
-For very large `.xlsx`, consider enabling **Git LFS**:
+Git LFS recommended for large `.xlsx` files:
 
 ```bash
 git lfs install
@@ -106,26 +159,26 @@ git add .gitattributes
 
 ## Licence
 
-- **Code:** see `LICENSE` (e.g. MIT).
-- **Data & Docs:** see `LICENSE-Data` / `LICENSE-Docs` (e.g. CC BY 4.0).
-
-State any third-party data restrictions here if applicable.
+Code → `LICENSE`  
+Data & Docs → `LICENSE-Data`, `LICENSE-Docs`
 
 ---
 
 ## Citation
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17602428.svg)](https://doi.org/10.5281/zenodo.17602428)
+### Software pipeline
 
-If you use this repository, please cite:
+> Marsellach, X. (2025).  
+> *Ageing is not just ageing & Rising disease prevalence — Data Analysis Pipeline* (v1.1.0).  
+> Zenodo. https://doi.org/10.5281/zenodo.17602428
 
-### 1. The software / data analysis pipeline
-> Marsellach, X. (2025). *Ageing is not just ageing — Data Analysis Pipeline* (v1.0.1) [Software]. Zenodo. https://doi.org/10.5281/zenodo.17602428
+### Manuscripts
 
-### 2. The associated preprint
-> Marsellach, X. (2025). *Ageing is not just ageing*. Zenodo Preprint. https://doi.org/10.5281/zenodo.15596247
+> Marsellach, X. (2025). *Ageing is not just ageing*.  
+> https://doi.org/10.5281/zenodo.15596247
 
-Machine-readable citation metadata are provided in `CITATION.cff`.
+> Marsellach, X. (2025). *Rising disease prevalence signals epigenetic degeneration in humans*.  
+> https://doi.org/10.20944/preprints202508.2157.v2
 
 ---
 

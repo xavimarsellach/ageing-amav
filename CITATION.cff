@@ -1,8 +1,8 @@
 cff-version: 1.2.0
-title: "Ageing is not just ageing — Data Analysis Pipeline"
+title: "Ageing is not just ageing & Rising disease prevalence — Data Analysis Pipeline"
 message: "If you use this software, please cite it using the metadata below."
 type: software
-version: 1.0.1
+version: 1.1.0
 
 authors:
   - family-names: Marsellach
@@ -14,11 +14,12 @@ doi: 10.5281/zenodo.17602428
 
 preferred-citation:
   type: software
-  title: "Ageing is not just ageing — Data Analysis Pipeline"
-  version: 1.0.1
+  title: "Ageing is not just ageing & Rising disease prevalence — Data Analysis Pipeline"
+  version: 1.1.0
   authors:
     - family-names: Marsellach
       given-names: Xavi
+      orcid: "https://orcid.org/0000-0002-2435-6904"
   year: 2025
   doi: 10.5281/zenodo.17602428
 
@@ -29,4 +30,12 @@ references:
       - family-names: Marsellach
         given-names: Xavi
     year: 2025
-    doi: 10.5281/zenodo.15596247
+    doi: 10.5281/zenodo.176626596   # <-- updated to Version 2 DOI
+
+  - type: article
+    title: "Rising disease prevalence signals epigenetic degeneration in humans"
+    authors:
+      - family-names: Marsellach
+        given-names: Xavi
+    year: 2025
+    doi: 10.20944/preprints202508.2157.v2

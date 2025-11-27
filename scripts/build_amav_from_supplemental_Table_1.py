@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Rebuild AMAV_DATA.xlsx from a single-table workbook (Supplemental_Table_1.xlsx).
+Rebuild AMAV_DATA.xlsx from a single-table workbook (Supplemental(ary)_Table_1.xlsx).
 
 Input expectation (neutral description):
 - One Excel workbook containing a single wide table with:
@@ -16,15 +16,17 @@ What the script computes:
 - AMAV: cumulative MAV restricted to the last contiguous block of defined MAV.
 - AMAV-POS: if AMAV in that block dips below zero, a positive-limb accumulation
   starting after the AMAV valley (MODE='prev'), optionally including negative MAV.
-- Aggregated outputs:
-    • AMAV-P   : one column per phenotype (indexed by Year) using AMAV-POS if it exists,
-                 otherwise AMAV.
-    • AMAV-F-Y : AMAV-P normalised by the first positive value (by Year).
-    • AMAV-F-R : Same normalisation but re-indexed 0..n per phenotype (relative time).
-    • LOG_used_column : Phenotype name and number of trends parsed.
+- Aggregated outputs (written to AMAV_DATA.xlsx):
+    • AMAV           : one column per phenotype (indexed by Year) using AMAV-POS
+                       if it exists, otherwise AMAV.
+    • FOLD_YEARLY    : AMAV normalised by the first positive value (by Year).
+    • FOLD_RELATIVE  : Same normalisation but re-indexed 0..n per phenotype
+                       (relative time).
+    • LOG_used_column: Phenotype name and number of trends parsed.
 
 Default paths (relative to current working directory):
-- Input  : data/Supplemental_Table_1.xlsx    (auto-discovery fallbacks included)
+- Input  : data/Supplemental_Table_1.xlsx or data/Supplementary_Table_1.xlsx
+          (auto-discovery also checks analysis/data and ./)
 - Output : output/AMAV_DATA.xlsx             (directory is created if missing)
 
 CLI:
@@ -205,7 +207,7 @@ def first_positive_baseline(s: pd.Series) -> float:
     return np.nan
 
 
-# -------- Read single table from Supplemental_Table_1 --------
+# -------- Read single table from Supplemental(ary)_Table_1 --------
 def find_table_sheet(xlsx: Path) -> str:
     """Find the sheet whose (0,0) cell is 'Phenotype' (fallback: first sheet)."""
     xls = pd.ExcelFile(xlsx)
@@ -311,14 +313,19 @@ def resolve_input_output(
     if input_xlsx is None:
         candidates = [
             cwd / "data" / "Supplemental_Table_1.xlsx",
+            cwd / "data" / "Supplementary_Table_1.xlsx",
             cwd / "analysis" / "data" / "Supplemental_Table_1.xlsx",
+            cwd / "analysis" / "data" / "Supplementary_Table_1.xlsx",
             cwd / "Supplemental_Table_1.xlsx",
+            cwd / "Supplementary_Table_1.xlsx",
         ]
         inp = next((p for p in candidates if p.exists()), None)
         if inp is None:
             raise SystemExit(
                 "Input file not found. Expected at one of: "
-                "data/Supplemental_Table_1.xlsx, analysis/data/Supplemental_Table_1.xlsx, ./Supplemental_Table_1.xlsx"
+                "data/Supplemental_Table_1.xlsx, data/Supplementary_Table_1.xlsx, "
+                "analysis/data/Supplemental_Table_1.xlsx, analysis/data/Supplementary_Table_1.xlsx, "
+                "./Supplemental_Table_1.xlsx, ./Supplementary_Table_1.xlsx"
             )
     else:
         inp = Path(input_xlsx)
@@ -332,18 +339,18 @@ def resolve_input_output(
     return inp, out
 
 
-def write_workbook(amavp_df: pd.DataFrame, folds_y: pd.DataFrame,
-                   folds_r: pd.DataFrame, log_df: pd.DataFrame, out_path: Path) -> None:
+def write_workbook(amav_df: pd.DataFrame, folds_y: pd.DataFrame,
+                   folds_rel: pd.DataFrame, log_df: pd.DataFrame, out_path: Path) -> None:
     """Write the 4 output sheets to an Excel workbook."""
     with pd.ExcelWriter(out_path, engine="xlsxwriter") as xw:
-        amavp_df.reset_index().rename(columns={"index": "Year"}).to_excel(
-            xw, index=False, sheet_name="AMAV-P"
+        amav_df.reset_index().rename(columns={"index": "Year"}).to_excel(
+            xw, index=False, sheet_name="AMAV"
         )
         folds_y.reset_index().rename(columns={"index": "Year"}).to_excel(
-            xw, index=False, sheet_name="AMAV-F-Y"
+            xw, index=False, sheet_name="FOLD_YEARLY"
         )
-        folds_r.rename_axis("RelYear").reset_index().to_excel(
-            xw, index=False, sheet_name="AMAV-F-R"
+        folds_rel.rename_axis("RelYear").reset_index().to_excel(
+            xw, index=False, sheet_name="FOLD_RELATIVE"
         )
         log_df.to_excel(xw, index=False, sheet_name="LOG_used_column")
 
@@ -364,33 +371,33 @@ def build_amav(input_xlsx: str | Path | None = None,
     if not series_by:
         raise SystemExit("No diseases could be parsed into AMAV/AMAV-POS series.")
 
-    # AMAV-P: union of years across all diseases
+    # AMAV: union of years across all diseases
     all_years = sorted(set().union(*[set(s.index) for s in series_by.values()]))
-    amavp_df = pd.DataFrame(index=all_years)
+    amav_df = pd.DataFrame(index=all_years)
     for disease, s in series_by.items():
-        amavp_df[disease] = s.reindex(all_years)
+        amav_df[disease] = s.reindex(all_years)
 
-    # AMAV-F-Y: normalised by first positive baseline, indexed by Year
-    folds_y = pd.DataFrame(index=amavp_df.index)
-    for col in amavp_df.columns:
-        v = amavp_df[col]
+    # FOLD_YEARLY: normalised by first positive baseline, indexed by Year
+    folds_y = pd.DataFrame(index=amav_df.index)
+    for col in amav_df.columns:
+        v = amav_df[col]
         b = first_positive_baseline(v.dropna())
         folds_y[col] = v / b if pd.notna(b) else np.nan
 
-    # AMAV-F-R: same but re-indexed 0..n per disease
+    # FOLD_RELATIVE: same but re-indexed 0..n per disease
     rel_dict: Dict[str, pd.Series] = {}
     max_len = 0
-    for col in amavp_df.columns:
-        v = amavp_df[col].dropna()
+    for col in amav_df.columns:
+        v = amav_df[col].dropna()
         b = first_positive_baseline(v)
         rel = (v / b) if pd.notna(b) else pd.Series(dtype=float)
         rel.index = range(len(rel))
         rel_dict[col] = rel
         max_len = max(max_len, len(rel))
 
-    folds_r = pd.DataFrame(index=range(max_len))
+    folds_rel = pd.DataFrame(index=range(max_len))
     for col, s in rel_dict.items():
-        folds_r[col] = s.reindex(folds_r.index)
+        folds_rel[col] = s.reindex(folds_rel.index)
 
     # LOG sheet: phenotype + number of trends parsed
     log_df = (
@@ -402,7 +409,7 @@ def build_amav(input_xlsx: str | Path | None = None,
         .sort_values("Disease")
     )
 
-    write_workbook(amavp_df, folds_y, folds_r, log_df, out)
+    write_workbook(amav_df, folds_y, folds_rel, log_df, out)
     print(f"✅ OK: created {out}")
     return out
 
