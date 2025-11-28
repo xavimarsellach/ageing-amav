@@ -116,7 +116,7 @@ cat("knitr root.dir set to:", getwd(), "\n")
 
 ## Code for `build_amav_from_supplemental_Table_1.py`
 
-```{python}
+```{r}
 #| label: Code for build_amav_from_supplemental_Table_1.py
 #| eval: false
 #| code-line-numbers: true

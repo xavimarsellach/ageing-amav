@@ -30,8 +30,7 @@ jobs:
           Rscript -e 'install.packages(
             c("knitr","rmarkdown",
               "readxl","ggplot2","reshape2","scales",
-              "writexl","dplyr","tidyr",
-              "reticulate"),
+              "writexl","dplyr","tidyr"),
             repos = "https://cloud.r-project.org"
           )'
 
