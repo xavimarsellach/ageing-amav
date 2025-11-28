@@ -6,10 +6,7 @@ date: today
 format:
   html:
     toc: true
-    code-fold: true
-  pdf:
-    pdf-engine: lualatex
-    documentclass: article
+default-image-extension: png
 
 execute:
   engine: knitr
