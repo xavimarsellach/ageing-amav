@@ -1,7 +1,19 @@
 # Ageing is not just ageing & Rising disease prevalence — Data Analysis Pipeline
 
+## DOI
 
+### 🔵 Software pipeline (Concept DOI)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17602427.svg)](https://doi.org/10.5281/zenodo.17602427)
+
+### 🟣 Associated manuscripts
+
+**Ageing is not just ageing**  
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17662596.svg)](https://doi.org/10.5281/zenodo.17662596)
+
+**Rising disease prevalence signals epigenetic degeneration in humans**  
+[![DOI](https://img.shields.io/badge/Preprints-10.20944/preprints202508.2157.v2-blue.svg)](https://doi.org/10.20944/preprints202508.2157.v2)
+
+---
 
 This repository contains the full data-analysis pipeline used in:
 
@@ -15,8 +27,8 @@ Both manuscripts rely on the same underlying epidemiological reconstruction of
 The pipeline reconstructs `AMAV_DATA.xlsx` directly from the consolidated  
 prevalence workbooks:
 
-- `data/Supplemental_Table_1.xlsx` (used in *Ageing is not just ageing*)
-- `data/Supplementary_Table_1.xlsx` (used in *Rising disease prevalence…*)
+- `data/Supplemental_Table_1.xlsx`
+- `data/Supplementary_Table_1.xlsx`
 
 Either filename is accepted automatically.
 
@@ -63,8 +75,8 @@ Either filename is accepted automatically.
 
 ## What the pipeline does (summary)
 
-- Reads a single-table prevalence workbook (`Supplemental_Table_1.xlsx` or `Supplementary_Table_1.xlsx`).
-- Each row is one prevalence trend (study). A `Citation` column, if present, is ignored.
+- Reads a single-table prevalence workbook (`Supplemental_Table_1.xlsx` or `Supplementary_Table_1.xlsx`).  
+- Each row is one prevalence trend (study). A `Citation` column, if present, is ignored.  
 - For each phenotype (disease):
   - Builds piecewise linear slopes between observed points.
   - Computes yearly **MAV** (mean slope across studies).
@@ -73,17 +85,10 @@ Either filename is accepted automatically.
 
 - Aggregates outputs across all phenotypes into `AMAV_DATA.xlsx`, containing:
 
-  - **`AMAV`**  
-    Per-disease AMAV/AMAV-POS by calendar year.
-
-  - **`FOLD_YEARLY`**  
-    Yearly fold-increase (normalised by the first positive AMAV/AMAV-POS value).
-
-  - **`FOLD_RELATIVE`**  
-    The same fold-increase series re-indexed 0…n per disease.
-
-  - **`LOG_used_column`**  
-    Number of trends parsed per phenotype (disease name and number of contributing studies).
+  - **`AMAV`** – per-disease AMAV/AMAV-POS by calendar year.  
+  - **`FOLD_YEARLY`** – yearly fold-increase (normalised by the first positive AMAV/AMAV-POS value).  
+  - **`FOLD_RELATIVE`** – the same fold-increase series re-indexed 0…n per disease.  
+  - **`LOG_used_column`** – number of trends parsed per phenotype (disease name and number of contributing studies).  
 
 These sheets are then used by the R scripts to generate all **main figures (1–4)** and **supplemental figures** for the two manuscripts.
 
@@ -91,13 +96,13 @@ These sheets are then used by the R scripts to generate all **main figures (1–
 
 ## Requirements
 
-- **Conda/Miniforge** (or Mamba)
+- **Conda/Miniforge** (or Mamba)  
 - **Python ≥ 3.12** with:
-  - `pandas`, `numpy`, `openpyxl`, `XlsxWriter`, `matplotlib`, `statsmodels`
-- **Quarto ≥ 1.4**
+  - `pandas`, `numpy`, `openpyxl`, `XlsxWriter`, `matplotlib`, `statsmodels`  
+- **Quarto ≥ 1.4**  
 - **R** with packages:
-  - `readxl`, `ggplot2`, `reshape2`, `scales`, `writexl`, `dplyr`, `tidyr`
-- For **PDF** rendering: a TeX distribution with **LuaLaTeX** (e.g. MacTeX/TeX Live)
+  - `readxl`, `ggplot2`, `reshape2`, `scales`, `writexl`, `dplyr`, `tidyr`  
+- For **PDF** rendering: a TeX distribution with **LuaLaTeX** (e.g. MacTeX/TeX Live)  
 
 All core Python packages are listed in `environment.yml`.
 
@@ -134,12 +139,12 @@ quarto render analysis/Ageing_is_not_Just-ageing_AMAV_Data_Process_Pipeline.qmd
 
 This will:
 
-1. Rebuild `output/AMAV_DATA.xlsx` from the appropriate `Supplemental(ary)_Table_1.xlsx`.
+1. Rebuild `output/AMAV_DATA.xlsx` from the appropriate `Supplemental(ary)_Table_1.xlsx`.  
 2. Run all R scripts in `scripts/` to generate:
-   - Figure 1 (raw prevalence and loss of studies)
-   - Figures 2–3 (AMAV-derived disease trajectories)
-   - Figure 4 (mental vs physical fold-increase dynamics)
-   - Supplemental figures (e.g. S1B and others)
+   - Figure 1 (raw prevalence and loss of studies)  
+   - Figures 2–3 (AMAV-derived disease trajectories)  
+   - Figure 4 (mental vs physical fold-increase dynamics)  
+   - Supplemental figures (e.g. S1B and others)  
 3. Render HTML and, if enabled, PDF for the Quarto document.
 
 ---
@@ -163,10 +168,10 @@ python scripts/build_amav_from_supplemental_Table_1.py   data/Supplementary_Tabl
 
 ## Reproducibility notes
 
-- Year columns are auto-detected (e.g. 1940…2023).
-- Numeric parsing is robust to percentages, comma decimals, and thousand separators.
-- Missing or irregular values are handled gracefully.
-- Results depend only on the content of the `data/` Excel workbooks and CSV files.
+- Year columns are auto-detected (e.g. 1940…2023).  
+- Numeric parsing is robust to percentages, comma decimals, and thousand separators.  
+- Missing or irregular values are handled gracefully.  
+- Results depend only on the content of the `data/` Excel workbooks and CSV files.  
 
 For large `.xlsx` files, Git LFS is recommended:
 
@@ -180,9 +185,9 @@ git add .gitattributes
 
 ## Licence
 
-- **Code:** see `LICENSE` (e.g. MIT).
-- **Data:** see `LICENSE-Data`.
-- **Docs/Figures:** see `LICENSE-Docs`.
+- **Code:** see `LICENSE`.  
+- **Data:** see `LICENSE-Data`.  
+- **Docs/Figures:** see `LICENSE-Docs`.  
 
 Please check individual files or subdirectories for any additional restrictions.
 
@@ -190,15 +195,13 @@ Please check individual files or subdirectories for any additional restrictions.
 
 ## Citation
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17602427.svg)](https://doi.org/10.5281/zenodo.17602427)
-
-If you use this repository, please cite:
-
 ### 1. Software pipeline
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17602427.svg)](https://doi.org/10.5281/zenodo.17602427)
 
 > Marsellach, X. (2025).  
 > *Ageing is not just ageing & Rising disease prevalence — Data Analysis Pipeline* (v1.1.0) [Software].  
-> Zenodo. https://doi.org/10.5281/zenodo.17742857
+> Zenodo. https://doi.org/10.5281/zenodo.17602427
 
 ### 2. Associated manuscripts
 
