@@ -122,9 +122,8 @@ Install the required R packages in your R installation (outside Conda, if you pr
 ```r
 install.packages(c(
   "readxl", "ggplot2", "reshape2", "scales",
-  "writexl", "dplyr", "tidyr"
-))
-```
+  "writexl", "dplyr", "tidyr", "forcats" "patchwork"
+))```
 
 ---
 

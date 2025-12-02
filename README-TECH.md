@@ -33,7 +33,7 @@ conda activate ageing-amav
 # 3. Install required R packages in your R installation
 R -q -e 'install.packages(c(
   "readxl","ggplot2","reshape2","scales",
-  "writexl","dplyr","tidyr", "patchwork"
+  "writexl","dplyr","tidyr", "patchwork" "forcats"
 ), repos = "https://cloud.r-project.org")'
 ```
 
