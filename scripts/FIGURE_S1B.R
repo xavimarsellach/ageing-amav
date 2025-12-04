@@ -37,7 +37,7 @@ physical <- c(
 mental <- c(
   "ADHD", "Alzheimer", "Anxiety", "Autism", "Bipolar Disorder",
   "Dementia", "Depression", "Eating Disorders", "Handedness",
-  "Homosexuality (Men)", "Homosexuality (Women)",
+  "Homosexuality - Men", "Homosexuality - Women",
   "Personality Disorders", "Schizophrenia",
   "Suicide", "Transgender & Gender Dysphoria"
 )

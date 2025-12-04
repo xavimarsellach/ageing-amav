@@ -1,4 +1,4 @@
-# Figure 2 and Figure 3 from AMAV_DATA.xlsx (sheet "AMAV-P")
+# Figure 2 and Figure 3 from AMAV_DATA.xlsx (sheet "AMAV")
 # Physical vs mental disease prevalence (AMAV)
 # ------------------------------------------------
 # This script reads the master file `AMAV_DATA.xlsx` and generates:
@@ -14,12 +14,12 @@ library(scales)
 
 # ---------- Config ----------
 
-file_path <- "output/AMAV_DATA.xlsx"
+file_path <- "data/AMAV_DATA.xlsx"
 
 # Physical diseases for Figure 2
 physical_diseases <- c(
   "Allergic Rhinitis",
-  "Alopecia Aereata",
+  "Alopecia Areata",
   "Anaemia",
   "Asthma",
   "Atopic Dermatitis",
@@ -47,8 +47,8 @@ mental_diseases <- c(
   "Depression",
   "Eating Disorders",
   "Handedness",
-  "Homosexuality (Men)",
-  "Homosexuality (Women)",
+  "Homosexuality - Men",
+  "Homosexuality - Women",
   "Personality Disorders",
   "Schizophrenia",
   "Suicide",
@@ -138,13 +138,18 @@ figure_2 <- make_amav_plot(
 
 figure_3 <- make_amav_plot(
   df_wide    = fig3_data,
-  plot_title = "Epigenetic Degeneration Examples. Set Number Two. Mental Healt Issues"
+  plot_title = "Epigenetic Degeneration Examples. Set Number Two. Mental Health Issues"
 )
 
 # Print static versions (for scripts / small screens)
 print(figure_2)
 print(figure_3)
 
-# If you want to save to files, uncomment for example:
-# ggsave("Figure_2_AMAV_physical.png", figure_2, width = 8, height = 6, dpi = 300)
-# ggsave("Figure_3_AMAV_mental.png",   figure_3, width = 8, height = 6, dpi = 300)
+# Save to files in output/ (like the GitHub pipeline)
+dir.create("output", showWarnings = FALSE)
+
+ggsave(file.path("output", "Figure_2_AMAV_physical.png"),
+       figure_2, width = 8, height = 6, dpi = 300)
+
+ggsave(file.path("output", "Figure_3_AMAV_mental.png"),
+       figure_3, width = 8, height = 6, dpi = 300)
