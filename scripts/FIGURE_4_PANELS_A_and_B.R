@@ -16,7 +16,7 @@ library(patchwork)
 
 # --------- 1. CONFIG ---------------------------------------------------
 
-file_path <- "data/AMAV_DATA.xlsx"   # adjust path if needed
+file_path <- "output/AMAV_DATA.xlsx"   # adjust path if needed
 
 physical_diseases <- c(
   "Allergic Rhinitis","Alopecia Aereata","Anaemia","Asthma","Atopic Dermatitis",

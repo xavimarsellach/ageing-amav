@@ -14,7 +14,7 @@ library(scales)
 
 # ---------- Config ----------
 
-file_path <- "data/AMAV_DATA.xlsx"
+file_path <- "output/AMAV_DATA.xlsx"
 
 # Physical diseases for Figure 2
 physical_diseases <- c(
@@ -147,7 +147,6 @@ print(figure_3)
 
 # Save to files in output/ (like the GitHub pipeline)
 dir.create("output", showWarnings = FALSE)
-
 ggsave(file.path("output", "Figure_2_AMAV_physical.png"),
        figure_2, width = 8, height = 6, dpi = 300)
 

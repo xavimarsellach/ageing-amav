@@ -24,7 +24,7 @@ if (!dir.exists("output")) {
 
 # ------------------ 1. Read FOLD_RELATIVE -----------------------------------
 
-file_path <- "data/AMAV_DATA.xlsx"  # same as for panels A–B
+file_path <- "output/AMAV_DATA.xlsx"  # same as for panels A–B
 df <- read_excel(file_path, sheet = "FOLD_RELATIVE")
 
 rel_col <- "RelYear"

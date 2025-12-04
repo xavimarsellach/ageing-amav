@@ -210,33 +210,29 @@ old_wd <- getwd()
 setwd(root)
 on.exit(setwd(old_wd), add = TRUE)
 
-# Required output file (created from AMAV_DATA.xlsx)
+nm_script <- file.path("scripts", "remove_monotonic_prefix_FOLD_RELATIVE.R")
 nm_path   <- file.path("output", "AMAV_DATA-no-monotonic_AUTO.xlsx")
 
-# The correct script that produces the “no-monotonic” dataset:
-# it trims deterministic monotonic prefixes from FOLD_RELATIVE
-nm_script <- file.path("scripts", "remove_monotonic_prefix_FOLD_RELATIVE.R")
-
-# Ensure "no-monotonic" file exists
-if (!file.exists(nm_path)) {
-  if (file.exists(nm_script)) {
-    cat("ℹ️ 'AMAV_DATA-no-monotonic_AUTO.xlsx' not found; running remove_monotonic_prefix_FOLD_RELATIVE.R...\n")
-    source(nm_script)
-  } else {
-    stop("Missing both the no-monotonic file AND the R script that generates it. Cannot continue.")
-  }
+# Always rebuild the no-monotonic file
+if (file.exists(nm_script)) {
+  cat("🔁 Rebuilding AMAV_DATA-no-monotonic_AUTO.xlsx...\n")
+  source(nm_script)
+} else {
+  stop("❌ Script remove_monotonic_prefix_FOLD_RELATIVE.R not found.")
 }
 
-# Double-check that the file was created
+# Ensure the file was actually generated
 if (!file.exists(nm_path)) {
-  stop("AMAV_DATA-no-monotonic_AUTO.xlsx is still missing after running remove_monotonic_prefix_FOLD_RELATIVE.R.")
+  stop("❌ AMAV_DATA-no-monotonic_AUTO.xlsx was not created.")
+} else {
+  cat("✅ AMAV_DATA-no-monotonic_AUTO.xlsx reconstructed.\n")
 }
 
-# Generate Figure S1B
+# Now generate Figure S1B
 fig_script <- file.path("scripts", "FIGURE_S1B.R")
 if (file.exists(fig_script)) {
   source(fig_script)
-  cat("✅ Supplemental Figure S1B generated.\n")
+  cat("📊 Supplemental Figure S1B generated.\n")
 } else {
   cat("⚠️ FIGURE_S1B.R not found; skipping Supplemental Figure S1B.\n")
 }

@@ -26,7 +26,7 @@ if (!dir.exists("output")) {
   dir.create("output")
 }
 
-input_file  <- "data/AMAV_DATA.xlsx"
+input_file  <- "output/AMAV_DATA.xlsx"
 output_file <- "output/AMAV_DATA-no-monotonic_AUTO.xlsx"
 
 # Read all sheets we want to preserve
